@@ -9,17 +9,23 @@ import traceback
 class ServerConnection:
     def __init__(self):
         self.running = True
+        self.hostSock = socket.socket()
         self.sock = socket.socket()
         self.prevCopy = self.GetValue()
         self.port = 8080
+        self.hostPort = 1020
         self.MemoryBuffer = 1024
         self.name = socket.gethostname()
         self.NotifyName()
         self.NotifyPort()
+        self.createServer()
         self.connectionName = self.EstablishHostName()
         self.AttemptConnection()
         self.Run()
 
+    def createServer(self):
+        self.hostSock.bind((self.name, self.hostPort))
+        self.hostSock.listen(1)
     def NotifyName(self):
         print("Your Device's Name is: " + self.name)
     def Run(self):
