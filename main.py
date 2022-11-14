@@ -1,44 +1,78 @@
 import socket
+import traceback
+import sys
 import pyperclip as pc
 from PIL import ImageGrab
 import numpy as np
+import traceback
 
-def GetValue():
-    ping = pc.paste()
-    if not ping:
-        ping = ImageGrab.grabclipboard().convert("RGB")
-    return ping
+class ServerConnection:
+    def __init__(self):
+        self.running = True
+        self.sock = socket.socket()
+        self.prevCopy = self.GetValue()
+        self.port = 8080
+        self.MemoryBuffer = 1024
+        self.NotifyPort()
+        self.name = socket.gethostname()
+        self.connectionName = self.EstablishHostName()
+        self.AttemptConnection()
+        self.Run()
 
-def arrayToString(array):
-    for i in range(len(array)):
-        for i2 in range(len(array[i])):
-            array[i][i2] = "SUB3".join(array[i][i2])
-        array[i] = "SUB2".join(array[i])
-    array = "SUB1".join(array)
-    return array
+    def Run(self):
+        while self.running:
+            NewValue = self.GetValue()
+            if NewValue != self.prevCopy:
+                self.SendInput(NewValue)
+                self.prevCopy = NewValue
 
-s = socket.socket()
-prevCopy = ""
-name = socket.gethostname()
-print(name)
+    def SendInput(self, String):
+        chunks = []
+        chunkInput = ""
+        for letter in String:
+            size = sys.getsizeof(chunkInput)
+            if size >= 7 * self.MemoryBuffer / 8:
+                chunks.append(chunkInput)
+                chunkInput = ""
+            else:
+                chunkInput += letter
+        chunks = [str(len(chunks))] + chunks
+        for buffer in chunks:
+            print(buffer)
+            self.sock.send(buffer.encode("utf-8"))
 
-host = "SION-LAPTOP"
+    def LB(self):
+        print('\033[95m' + "-" * 50 + '\033[0m')
 
-port = 8080
+    def AttemptConnection(self):
+        self.LB()
+        self.sock.connect((self.connectionName, self.port))
+        print("Connection established with %s." % self.connectionName)
 
-s.connect((host, port))
-
-
-while True:
-    ping = GetValue()
-    if prevCopy != ping:
-        if type(ping) == str:
-            input_ = "STRING FORMAT - " + ping
-            input_ = input_.encode("utf-8")
+    def RetryConnection(self):
+        self.LB()
+        print("Would you like to try another device name?")
+        response = input("y/n: ")
+        if response == "y":
+            self.EstablishHostName()
+            self.AttemptConnection()
         else:
-            array = np.array(ping)
-            array = array.astype(str)
-            array = arrayToString(array.tolist())
-            input_ = array.encode("utf-8")
-        s.send(input_)
-        prevCopy = ping
+            quit()
+
+    def NotifyPort(self):
+        print("Your port is %d" % self.port)
+
+    def EstablishHostName(self):
+        self.LB()
+        print("Input the host name of the other computer you are trying to connect to.")
+        print("This is labeled as the host name on your other device.")
+        return input("Client Name: ")
+
+    def GetValue(self):
+        ping = pc.paste()
+        if not ping:
+            ping = ImageGrab.grabclipboard().convert("RGB")
+        return ping
+
+if __name__ == "__main__":
+    server = ServerConnection()
