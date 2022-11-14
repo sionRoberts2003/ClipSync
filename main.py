@@ -13,13 +13,17 @@ class ServerConnection:
         self.prevCopy = self.GetValue()
         self.port = 8080
         self.MemoryBuffer = 1024
-        self.NotifyPort()
         self.name = socket.gethostname()
+        self.NotifyName()
+        self.NotifyPort()
         self.connectionName = self.EstablishHostName()
         self.AttemptConnection()
         self.Run()
 
+    def NotifyName(self):
+        print("Your Device's Name is: " + self.name)
     def Run(self):
+        print("Running")
         while self.running:
             NewValue = self.GetValue()
             if NewValue != self.prevCopy:
