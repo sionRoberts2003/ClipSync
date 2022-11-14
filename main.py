@@ -23,7 +23,7 @@ class ServerConnection:
     def NotifyName(self):
         print("Your Device's Name is: " + self.name)
     def Run(self):
-        print("Running")
+        print("The device is now connected and running")
         while self.running:
             NewValue = self.GetValue()
             if NewValue != self.prevCopy:
