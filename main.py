@@ -2,6 +2,7 @@ import socket
 import traceback
 import sys
 import pyperclip as pc
+import random
 from PIL import ImageGrab
 import numpy as np
 import traceback
@@ -12,8 +13,8 @@ class ServerConnection:
         self.hostSock = socket.socket()
         self.sock = socket.socket()
         self.prevCopy = self.GetValue()
-        self.port = 8080
-        self.hostPort = 1020
+        self.port = 0
+        self.hostPort = random.randint(1000, 7500)
         self.MemoryBuffer = 1024
         self.name = socket.gethostname()
         self.NotifyName()
@@ -70,7 +71,9 @@ class ServerConnection:
             quit()
 
     def NotifyPort(self):
-        print("Your port is %d" % self.port)
+        print("Your port is %d" % self.hostPort)
+        print("Please input the port displayed on the device you are connecting to.")
+        self.port = int(input("Device port: "))
 
     def EstablishHostName(self):
         self.LB()
